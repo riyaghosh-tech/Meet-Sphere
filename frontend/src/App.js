@@ -414,9 +414,8 @@ function App() {
   };
 
   const renderHome = () => (
-    <section className="page-section home-page">
-      <Home />
-      {renderEvents()}
+    <section className="page-section home-page-container">
+      <Home currentUser={currentUser} events={events} />
     </section>
   );
 
@@ -508,6 +507,19 @@ function App() {
               })
             }
           />
+          {createForm.location && createForm.location.trim().length > 2 && (
+            <div className="mt-2 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-sm" style={{ height: '200px', width: '100%', marginBottom: '12px' }}>
+              <iframe
+                title="Event Location Map"
+                width="100%"
+                height="100%"
+                style={{ border: 0 }}
+                loading="lazy"
+                allowFullScreen
+                src={`https://www.google.com/maps?q=${encodeURIComponent(createForm.location.trim())}&output=embed`}
+              ></iframe>
+            </div>
+          )}
           <label htmlFor="category">Category</label>
           <input
             id="category"
@@ -1033,8 +1045,21 @@ function App() {
   const isFullBleed = isLanding || isLogin;
 
   return (
-    <div className={`app-shell${isLogin ? " app-shell--fullbleed" : ""}`}>
-      {!isFullBleed && (
+    <div 
+      className={`app-shell${isLogin ? " app-shell--fullbleed" : ""}${currentPage === "home" ? " bg-slate-950 text-slate-100" : ""}`}
+    >
+      {currentPage === "home" && (
+        <>
+          {/* Premium background grid overlay (from Login) */}
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,#0f172a_1px,transparent_1px),linear-gradient(to_bottom,#0f172a_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-40 pointer-events-none" />
+          
+          {/* Glowing backdrop aurora spheres (from Login) */}
+          <div className="absolute -top-40 -left-40 h-[600px] w-[600px] rounded-full bg-violet-600/5 blur-[120px] pointer-events-none" />
+          <div className="absolute -bottom-40 -right-40 h-[600px] w-[600px] rounded-full bg-rose-600/5 blur-[120px] pointer-events-none" />
+        </>
+      )}
+
+      {!isFullBleed && currentPage !== "home" && (
         <>
           <div className="global-orb orb-1"></div>
           <div className="global-orb orb-2"></div>
@@ -1043,39 +1068,55 @@ function App() {
       )}
 
       {!isFullBleed && (
-        <nav className="top-navbar">
-          <h2 className="navbar-brand">
-            <button
-              type="button"
-              className="navbar-brand-btn"
-              onClick={() => navigate("/home")}
-            >
-              <span className="navbar-logo-icon" aria-hidden />
-              MeetSphere
+        <nav className="top-navbar futuristic-nav">
+          <div className="nav-left">
+            <h2 className="navbar-brand">
+              <button
+                type="button"
+                className="navbar-brand-btn"
+                onClick={() => navigate("/home")}
+              >
+                <div className="navbar-logo-icon"></div>
+                MeetSphere
+              </button>
+            </h2>
+          </div>
+          <div className="nav-center">
+            <button type="button" className={`nav-link ${currentPage === 'home' ? 'active' : ''}`} onClick={() => navigate("/home")}>
+              <span className="icon">🏠</span> Home
             </button>
-          </h2>
-          <div className="nav-actions">
-            <button type="button" onClick={() => setDarkMode(!darkMode)}>
-              {darkMode ? "☀️ Light" : "🌙 Dark"}
+            <button type="button" className="nav-link" onClick={() => navigate("/create")}>
+              <span className="icon">⊕</span> Create
             </button>
-            <button type="button" onClick={() => navigate("/login")}>
-              Login
+            <button type="button" className={`nav-link ${currentPage === 'dashboard' ? 'active' : ''}`} onClick={() => navigate("/dashboard")}>
+              <span className="icon">⊞</span> Dashboard
             </button>
-            <button type="button" onClick={() => navigate("/home")}>
-              Home
+            <button type="button" className={`nav-link ${currentPage === 'eventPrep' ? 'active' : ''}`} onClick={() => navigate("/event-prep")}>
+              <span className="icon">🗓️</span> Event Prep
             </button>
-            <button type="button" onClick={() => navigate("/create")}>
-              Create
+            <button type="button" className={`nav-link ${currentPage === 'chatbox' ? 'active' : ''}`} onClick={() => navigate("/chatbox")}>
+              <span className="icon">💬</span> Chatbox
             </button>
-            <button type="button" onClick={() => navigate("/dashboard")}>
-              Dashboard
+          </div>
+          <div className="nav-right">
+            <button type="button" className="icon-btn" onClick={() => setDarkMode(!darkMode)}>
+              {darkMode ? "☀️" : "🌙"}
             </button>
-            <button type="button" onClick={() => navigate("/event-prep")}>
-              Event Prep
+            <button type="button" className="icon-btn notification-btn">
+              🔔<span className="badge-count">3</span>
             </button>
-            <button type="button" onClick={() => navigate("/chatbox")}>
-              Chatbox
-            </button>
+            <div className="user-profile-nav">
+              <div className="avatar-circle">
+                {currentUser?.name ? currentUser.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'U'}
+              </div>
+              <span className="user-name">{currentUser?.name || "User"}</span>
+              <span className="dropdown-arrow">▼</span>
+            </div>
+            {!currentUser && (
+               <button type="button" className="nav-link" onClick={() => navigate("/login")}>
+                 Login
+               </button>
+            )}
           </div>
         </nav>
       )}

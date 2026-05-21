@@ -23,8 +23,8 @@ function GitHubIcon({ className }) {
 
 function TwitterIcon({ className }) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="#1DA1F2" aria-hidden>
-      <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417a9.868 9.868 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z" />
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
     </svg>
   );
 }
@@ -32,11 +32,11 @@ function TwitterIcon({ className }) {
 function IconInput({ id, label, type = "text", value, onChange, icon: Icon, required, rightSlot, placeholder }) {
   return (
     <div>
-      <label htmlFor={id} className="mb-2 block text-sm font-semibold text-gray-700">
+      <label htmlFor={id} className="mb-2 block text-sm font-semibold text-slate-200 tracking-wide">
         {label}
       </label>
       <div className="relative">
-        <Icon className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" strokeWidth={1.75} />
+        <Icon className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-500 transition-colors" strokeWidth={1.75} />
         <input
           id={id}
           type={type}
@@ -44,9 +44,9 @@ function IconInput({ id, label, type = "text", value, onChange, icon: Icon, requ
           onChange={onChange}
           required={required}
           placeholder={placeholder}
-          className={`w-full rounded-lg border border-gray-300 bg-white py-3 pl-10 text-sm text-gray-800 outline-none transition-all focus:border-orange-400 focus:ring-2 focus:ring-orange-400/20 ${rightSlot ? "pr-11" : "pr-4"}`}
+          className={`w-full rounded-xl border border-slate-800 bg-slate-950/40 py-3.5 pl-12 text-base text-white placeholder-slate-500 outline-none transition-all duration-300 focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 ${rightSlot ? "pr-11" : "pr-4"}`}
         />
-        {rightSlot && <div className="absolute right-3 top-1/2 -translate-y-1/2">{rightSlot}</div>}
+        {rightSlot && <div className="absolute right-4 top-1/2 -translate-y-1/2">{rightSlot}</div>}
       </div>
     </div>
   );
@@ -54,27 +54,40 @@ function IconInput({ id, label, type = "text", value, onChange, icon: Icon, requ
 
 function HeroCard() {
   return (
-    <div className="relative flex justify-center">
-      <div className="relative flex h-[250px] w-full max-w-[400px] flex-col overflow-hidden rounded-2xl bg-gradient-to-br from-orange-400 via-orange-500 to-pink-500 p-8 text-white shadow-lg">
-        {/* Decorative shapes */}
-        <div className="pointer-events-none absolute -right-4 top-8 h-24 w-24 rounded-full bg-white/10" />
-        <div className="pointer-events-none absolute bottom-6 right-10 h-16 w-16 rotate-12 rounded-2xl bg-white/10" />
-        <div className="pointer-events-none absolute right-4 top-1/2 h-20 w-20 rounded-full border border-white/20 bg-white/5" />
-
-        <p className="relative text-xs font-semibold uppercase tracking-wide opacity-90">MEETSPHERE</p>
-
-        <h1 className="relative mt-4 flex-1 text-2xl font-bold leading-snug">
-          Smart Tools for
-          <br />
-          <span className="inline-flex items-center gap-2">
-            <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white shadow-sm">
-              <Zap className="h-4 w-4 text-orange-500" fill="currentColor" strokeWidth={1.5} />
-            </span>
-            Smarter Work
+    <div className="relative flex flex-col items-center lg:items-start text-center lg:text-left space-y-8 p-4">
+      {/* Decorative backdrop glow */}
+      <div className="absolute -left-20 top-20 h-72 w-72 rounded-full bg-violet-600/10 blur-[100px] pointer-events-none" />
+      
+      <div className="relative space-y-4 max-w-lg">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/10 border border-violet-500/20 text-violet-300 text-xs font-semibold uppercase tracking-wider">
+          <Zap className="h-3.5 w-3.5" fill="currentColor" />
+          MeetSphere Hub
+        </div>
+        
+        <h1 className="text-4xl font-extrabold tracking-tight lg:text-5xl leading-tight text-white font-display">
+          Where Collaboration <br />
+          <span className="bg-gradient-to-r from-violet-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+            Meets Innovation
           </span>
         </h1>
+        
+        <p className="text-base text-slate-400 leading-relaxed">
+          Unlock a digital sphere designed for high-performance teams. Coordinate interactive meetings, plan projects with AI assistance, and foster rich community connections all in one unified workspace.
+        </p>
+      </div>
 
-        <p className="relative text-sm opacity-90">Your Digital Workspace</p>
+      {/* Main image card container */}
+      <div className="relative w-full max-w-[460px] group transition-all duration-500 hover:scale-[1.02] lg:-ml-2">
+        {/* Soft shadow glow behind */}
+        <div className="absolute inset-0 bg-gradient-to-r from-violet-500 to-pink-500 rounded-2xl blur-xl opacity-20 group-hover:opacity-30 transition-opacity duration-500" />
+        
+        <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-slate-900/40 p-3 shadow-glass backdrop-blur-sm">
+          <img 
+            src="/meetsphere_login_hero.png" 
+            alt="MeetSphere digital collaboration space" 
+            className="w-full h-auto rounded-xl object-cover shadow-2xl animate-float"
+          />
+        </div>
       </div>
     </div>
   );
@@ -128,7 +141,7 @@ export default function Login({
             <button
               type="button"
               onClick={() => setShowPassword((v) => !v)}
-              className="text-gray-400 hover:text-gray-600"
+              className="text-slate-500 hover:text-slate-300 transition-colors"
               aria-label={showPassword ? "Hide password" : "Show password"}
             >
               {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
@@ -138,16 +151,16 @@ export default function Login({
       </div>
 
       <div className="mb-6 mt-4 flex items-center justify-between text-sm">
-        <label className="flex cursor-pointer items-center gap-2 text-gray-600">
+        <label className="flex cursor-pointer items-center gap-2 text-slate-400 hover:text-slate-300 transition-colors">
           <input
             type="checkbox"
             checked={rememberMe}
             onChange={(e) => setRememberMe(e.target.checked)}
-            className="h-4 w-4 rounded border-gray-300 text-orange-500 focus:ring-orange-400"
+            className="h-4 w-4 rounded border-slate-800 bg-slate-950 text-violet-600 focus:ring-violet-500/20 focus:ring-offset-slate-900"
           />
           Remember me
         </label>
-        <a href="#forgot" className="font-medium text-orange-500 hover:text-orange-600">
+        <a href="#forgot" className="font-medium text-violet-400 hover:text-violet-300 transition-colors">
           Forgot password?
         </a>
       </div>
@@ -155,49 +168,55 @@ export default function Login({
       <button
         type="submit"
         disabled={isControlled && loadingLogin}
-        className="w-full rounded-lg bg-gradient-to-r from-orange-500 to-red-500 py-3 font-semibold text-white shadow-md transition-all hover:opacity-90 hover:shadow-lg disabled:opacity-60"
+        className="w-full rounded-xl bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 py-3 font-semibold text-white shadow-lg shadow-violet-950/30 transition-all duration-300 hover:scale-[1.01] hover:shadow-glow hover:opacity-95 disabled:opacity-60 disabled:scale-100"
       >
         {isControlled && loadingLogin ? "Logging in..." : "Login to your space"}
       </button>
 
       {loginMessage && (
-        <div className={`alert-${loginMessage.type} mt-4 rounded-lg text-sm`}>{loginMessage.text}</div>
+        <div className={`mt-4 p-4 rounded-xl text-sm border ${
+          loginMessage.type === "success" 
+            ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400" 
+            : "bg-rose-500/10 border-rose-500/20 text-rose-400"
+        }`}>
+          {loginMessage.text}
+        </div>
       )}
 
-      <p className="my-5 text-center text-sm text-gray-400">or continue with</p>
+      <p className="my-5 text-center text-sm text-slate-500">or continue with</p>
 
       <div className="flex justify-center gap-3">
         <button
           type="button"
           aria-label="Continue with Google"
-          className="flex h-11 flex-1 items-center justify-center rounded-lg border border-gray-300 bg-white transition-colors hover:border-gray-400 hover:bg-gray-50"
+          className="flex h-11 flex-1 items-center justify-center rounded-xl border border-slate-800 bg-slate-950/40 text-slate-300 transition-all duration-300 hover:border-slate-700 hover:bg-slate-900 hover:text-white"
         >
           <GoogleIcon className="h-5 w-5" />
         </button>
         <button
           type="button"
           aria-label="Continue with GitHub"
-          className="flex h-11 flex-1 items-center justify-center rounded-lg border border-gray-300 bg-white transition-colors hover:border-gray-400 hover:bg-gray-50"
+          className="flex h-11 flex-1 items-center justify-center rounded-xl border border-slate-800 bg-slate-950/40 text-slate-300 transition-all duration-300 hover:border-slate-700 hover:bg-slate-900 hover:text-white"
         >
           <GitHubIcon className="h-5 w-5" />
         </button>
         <button
           type="button"
           aria-label="Continue with Twitter"
-          className="flex h-11 flex-1 items-center justify-center rounded-lg border border-gray-300 bg-white transition-colors hover:border-gray-400 hover:bg-gray-50"
+          className="flex h-11 flex-1 items-center justify-center rounded-xl border border-slate-800 bg-slate-950/40 text-slate-300 transition-all duration-300 hover:border-slate-700 hover:bg-slate-900 hover:text-white"
         >
           <TwitterIcon className="h-5 w-5" />
         </button>
       </div>
 
-      <p className="mt-6 text-center text-xs text-gray-400">
+      <p className="mt-6 text-center text-xs text-slate-500">
         Don&apos;t have an account?{" "}
         {isControlled && onSwitchToRegister ? (
-          <button type="button" onClick={onSwitchToRegister} className="font-medium text-orange-500 hover:underline">
+          <button type="button" onClick={onSwitchToRegister} className="font-medium text-violet-400 hover:text-violet-300 hover:underline">
             Register here
           </button>
         ) : (
-          <Link to="/login?mode=register" className="font-medium text-orange-500 hover:underline">
+          <Link to="/login?mode=register" className="font-medium text-violet-400 hover:text-violet-300 hover:underline">
             Register here
           </Link>
         )}
@@ -238,7 +257,7 @@ export default function Login({
             <button
               type="button"
               onClick={() => setShowPassword((v) => !v)}
-              className="text-gray-400 hover:text-gray-600"
+              className="text-slate-400 hover:text-slate-300 transition-colors"
               aria-label={showPassword ? "Hide password" : "Show password"}
             >
               {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
@@ -247,19 +266,19 @@ export default function Login({
         />
       </div>
 
-      <p className="mt-3 text-xs text-gray-500">
+      <p className="mt-3 text-xs text-slate-500 leading-relaxed">
         Password must be at least 8 characters with uppercase, lowercase, number, and special character.
       </p>
 
       <div className="mt-4">
-        <label htmlFor="register-role" className="mb-2 block text-sm font-semibold text-gray-700">
+        <label htmlFor="register-role" className="mb-2 block text-sm font-semibold text-slate-200 tracking-wide">
           Role
         </label>
         <select
           id="register-role"
           value={registerForm.role}
           onChange={(e) => onRegisterFormChange({ ...registerForm, role: e.target.value })}
-          className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400/20"
+          className="w-full rounded-xl border border-slate-800 bg-slate-950/60 px-4 py-3.5 text-base text-slate-200 outline-none transition-all duration-300 focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20"
         >
           <option value="volunteer">General Volunteer</option>
           <option value="core">Core Team</option>
@@ -270,18 +289,24 @@ export default function Login({
       <button
         type="submit"
         disabled={loadingRegister}
-        className="mt-6 w-full rounded-lg bg-gradient-to-r from-orange-500 to-red-500 py-3 font-semibold text-white shadow-md transition-all hover:opacity-90 disabled:opacity-60"
+        className="mt-6 w-full rounded-xl bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 py-3 font-semibold text-white shadow-lg shadow-violet-950/30 transition-all duration-300 hover:scale-[1.01] hover:shadow-glow hover:opacity-95 disabled:opacity-60"
       >
         {loadingRegister ? "Registering..." : "Create your account"}
       </button>
 
       {registerMessage && (
-        <div className={`alert-${registerMessage.type} mt-4 rounded-lg text-sm`}>{registerMessage.text}</div>
+        <div className={`mt-4 p-4 rounded-xl text-sm border ${
+          registerMessage.type === "success" 
+            ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400" 
+            : "bg-rose-500/10 border-rose-500/20 text-rose-400"
+        }`}>
+          {registerMessage.text}
+        </div>
       )}
 
-      <p className="mt-6 text-center text-xs text-gray-400">
+      <p className="mt-6 text-center text-xs text-slate-500">
         Already have an account?{" "}
-        <button type="button" onClick={onSwitchToLogin} className="font-medium text-orange-500 hover:underline">
+        <button type="button" onClick={onSwitchToLogin} className="font-medium text-violet-400 hover:text-violet-300 hover:underline">
           Login here
         </button>
       </p>
@@ -289,49 +314,69 @@ export default function Login({
   );
 
   return (
-    <div className="login-page-root flex min-h-full w-full flex-col bg-[#f5f7fb] font-sans">
-      {/* Top gradient navbar */}
-      <header className="flex h-16 shrink-0 items-center gap-2 bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 px-6 text-white">
-        <div className="flex h-8 w-8 items-center justify-center rounded-md bg-white/20">
-          <Lock className="h-4 w-4" strokeWidth={2} />
+    <div className="login-page-root flex min-h-screen w-full flex-col bg-slate-950 font-sans text-slate-100 relative overflow-hidden">
+      
+      {/* Premium background grid overlay */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#0f172a_1px,transparent_1px),linear-gradient(to_bottom,#0f172a_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-40 pointer-events-none" />
+      
+      {/* Glowing backdrop aurora spheres */}
+      <div className="absolute -top-40 -left-40 h-[600px] w-[600px] rounded-full bg-violet-600/5 blur-[120px] pointer-events-none" />
+      <div className="absolute -bottom-40 -right-40 h-[600px] w-[600px] rounded-full bg-rose-600/5 blur-[120px] pointer-events-none" />
+      
+      {/* Top glassmorphic header */}
+      <header className="sticky top-0 z-50 flex h-16 shrink-0 items-center justify-between border-b border-white/5 bg-slate-950/60 px-6 backdrop-blur-md">
+        <div className="flex items-center gap-2">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 text-white shadow-glow">
+            <Lock className="h-4.5 w-4.5" strokeWidth={2.2} />
+          </div>
+          <span className="text-lg font-bold tracking-tight text-white font-display">
+            Meet<span className="bg-gradient-to-r from-violet-400 to-pink-400 bg-clip-text text-transparent">Sphere</span>
+          </span>
         </div>
-        <span className="text-base font-semibold">MeetSphere</span>
+        
+        <Link 
+          to="/" 
+          className="text-sm font-medium text-slate-400 hover:text-white transition-colors duration-200"
+        >
+          Back to site
+        </Link>
       </header>
 
       {/* Main split content */}
-      <div className="flex flex-1 items-center justify-center overflow-y-auto px-6 py-10 md:px-10">
+      <div className="flex flex-1 items-center justify-center overflow-y-auto px-6 py-12 md:px-10 z-10">
         <div className="grid w-full max-w-6xl grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-16">
-          {/* Left — branding card */}
-          <div className="order-2 lg:order-1">
+          
+          {/* Left — Branding and Mockup Image */}
+          <div className="order-2 lg:order-1 flex justify-center lg:justify-start">
             <HeroCard />
           </div>
 
-          {/* Right — login form card */}
+          {/* Right — Glassmorphic login form card */}
           <div className="order-1 mx-auto w-full max-w-md lg:order-2">
-            <div className="rounded-2xl bg-white p-8 shadow-lg md:p-10">
+            <div className="relative rounded-3xl border border-white/10 bg-slate-900/60 p-8 shadow-glass backdrop-blur-xl md:p-10">
               {authMode === "login" ? (
                 <>
-                  <h2 className="text-2xl font-bold text-orange-500">Welcome Back!</h2>
-                  <p className="mt-2 text-sm leading-relaxed text-gray-500">
-                    Log in to access your dashboard, manage your account and collaborate with your team.
+                  <h2 className="text-3xl font-extrabold tracking-tight text-white font-display bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">Welcome Back</h2>
+                  <p className="mt-2 text-sm leading-relaxed text-slate-400">
+                    Log in to access your digital workspace, plan events, and collaborate with your team.
                   </p>
                   <div className="mt-8">{renderLoginForm()}</div>
-                  <p className="mt-6 text-center text-xs text-gray-400">
+                  <p className="mt-6 text-center text-xs text-slate-500 leading-relaxed">
                     By logging in, you agree to our{" "}
-                    <a href="#terms" className="text-orange-500 hover:underline">
+                    <a href="#terms" className="text-violet-400 hover:underline">
                       Terms of Service
                     </a>{" "}
                     and{" "}
-                    <a href="#privacy" className="text-orange-500 hover:underline">
+                    <a href="#privacy" className="text-violet-400 hover:underline">
                       Privacy Policy
                     </a>
                   </p>
                 </>
               ) : (
                 <>
-                  <h2 className="text-2xl font-bold text-orange-500">Create Account</h2>
-                  <p className="mt-2 text-sm leading-relaxed text-gray-500">
-                    Register to access your dashboard, manage your account and collaborate with your team.
+                  <h2 className="text-3xl font-extrabold tracking-tight text-white font-display bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">Create Account</h2>
+                  <p className="mt-2 text-sm leading-relaxed text-slate-400">
+                    Join MeetSphere to access event prep, coordinate teams, and scale your operations.
                   </p>
                   <div className="mt-8">{renderRegisterForm()}</div>
                 </>

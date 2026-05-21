@@ -9,11 +9,13 @@ const generateToken = (userId) =>
 
 const registerUser = async (req, res) => {
   try {
-    const { name, email, password, role } = req.body;
+    let { name, email, password, role } = req.body;
 
     if (!name || !email || !password) {
       return res.status(400).json({ message: 'Please provide all fields' });
     }
+
+    email = email.toLowerCase().trim();
 
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
     if (!passwordRegex.test(password)) {
@@ -50,10 +52,15 @@ const registerUser = async (req, res) => {
 
 const loginUser = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    let { email, password } = req.body; console.log('Login attempt:', req.body);
 
     if (!email || !password) {
       return res.status(400).json({ message: 'Please provide email and password' });
+    }
+
+    email = email.toLowerCase().trim();
+    if (typeof password === 'string') {
+      password = password.trim();
     }
 
     const user = await User.findOne({ email });
