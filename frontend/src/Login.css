@@ -1,0 +1,53 @@
+/* login elements use global glass-card and form tokens */
+.login-page {
+  min-height: calc(100vh - 80px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 420px;
+  margin: auto;
+}
+
+.login-title {
+  font-family: 'Outfit', sans-serif;
+  text-align: center;
+  font-size: 2rem;
+  font-weight: 800;
+  margin-bottom: 24px;
+}
+
+.login-subtitle {
+  text-align: center;
+  margin-top: 24px;
+  font-size: 0.95rem;
+  color: #64748b;
+}
+
+body.dark-mode .login-subtitle {
+  color: #94a3b8;
+}
+
+.register-link {
+  color: #f97316;
+  font-weight: 700;
+  text-decoration: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.95rem;
+}
+
+body.dark-mode .register-link {
+  color: #fb923c;
+}
+
+.register-link:hover {
+  text-decoration: underline;
+}
