@@ -3,6 +3,7 @@ import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import axios from "axios";
 import Home from "./Home";
 import Landing from "./Landing";
+import Login from "./Login";
 import EventPrep from "./EventPrep";
 import Groups from "./Groups";
 
@@ -18,12 +19,10 @@ const PATH_TO_PAGE = {
 
 /**
  * Dev: default "" → requests go to `/api/...` on the CRA dev server and proxy to port 5000 (package.json "proxy").
- * Production build: default `http://localhost:5000` unless REACT_APP_API_BASE is set (use that for deployed APIs).
+ * Set REACT_APP_API_BASE=http://localhost:5000 only if you are not using the CRA dev server proxy.
+ * Production build: set REACT_APP_API_BASE to your deployed API URL.
  */
-const API_BASE =
-  process.env.NODE_ENV === "development"
-    ? process.env.REACT_APP_API_BASE ?? `http://${window.location.hostname}:5000`
-    : process.env.REACT_APP_API_BASE ?? "";
+const API_BASE = process.env.REACT_APP_API_BASE ?? "";
 
 function toDateInputValue(val) {
   if (!val) return "";
@@ -151,6 +150,12 @@ function App() {
 
   const getErrorMessage = (err, fallbackMessage) => {
     if (err.response?.data?.message) return err.response.data.message;
+    if (!err.response) {
+      const msg = err.message || "";
+      if (msg === "Network Error" || err.code === "ERR_NETWORK") {
+        return "Cannot reach the server. Start the backend: open a terminal in the backend folder and run npm start (port 5000), then try again.";
+      }
+    }
     if (err.message) return err.message;
     return fallbackMessage;
   };
@@ -416,136 +421,27 @@ function App() {
   );
 
   const renderLogin = () => (
-    <section className="page-section narrow">
-      <p className="login-back">
-        <button
-          type="button"
-          className="link-button"
-          onClick={() => navigate("/")}
-        >
-          ← Back to MeetSphere
-        </button>
-      </p>
-      <h2 className="page-title">{authMode === "login" ? "Login" : "Register"}</h2>
-      {authMode === "login" ? (
-        <form className="form-card" onSubmit={handleLoginSubmit}>
-          <label htmlFor="email">Email</label>
-          <input
-            id="email"
-            type="email"
-            placeholder="Email"
-            value={loginForm.email}
-            onChange={(e) =>
-              setLoginForm({ ...loginForm, email: e.target.value })
-            }
-          />
-          <label htmlFor="password">Password</label>
-          <input
-            id="password"
-            type="password"
-            placeholder="Password"
-            value={loginForm.password}
-            onChange={(e) =>
-              setLoginForm({
-                ...loginForm,
-                password: e.target.value,
-              })
-            }
-          />
-          <button type="submit" disabled={loadingLogin}>
-            {loadingLogin ? "Logging in..." : "Login"}
-          </button>
-          {loginMessage && (
-            <div className={`alert-${loginMessage.type}`}>
-              {loginMessage.text}
-            </div>
-          )}
-          <p className="page-subtitle">
-            Don&apos;t have an account?{" "}
-            <button
-              type="button"
-              className="link-button"
-              onClick={() => {
-                setAuthMode("register");
-                navigate("/login?mode=register", { replace: true });
-              }}
-            >
-              Register
-            </button>
-          </p>
-        </form>
-      ) : (
-        <form className="form-card" onSubmit={handleRegisterSubmit}>
-          <label htmlFor="name">Name</label>
-          <input
-            id="name"
-            type="text"
-            placeholder="Name"
-            value={registerForm.name}
-            onChange={(e) =>
-              setRegisterForm({ ...registerForm, name: e.target.value })
-            }
-          />
-          <label htmlFor="register-email">Email</label>
-          <input
-            id="register-email"
-            type="email"
-            placeholder="Email"
-            value={registerForm.email}
-            onChange={(e) =>
-              setRegisterForm({ ...registerForm, email: e.target.value })
-            }
-          />
-          <label htmlFor="register-password">Password</label>
-          <input
-            id="register-password"
-            type="password"
-            placeholder="Password (e.g., StrongP@ssw0rd)"
-            value={registerForm.password}
-            onChange={(e) =>
-              setRegisterForm({ ...registerForm, password: e.target.value })
-            }
-          />
-          <small style={{ display: "block", marginBottom: "15px", color: "#64748b", fontSize: "0.85em" }}>
-            Password must be at least 8 characters long, include an uppercase letter, a lowercase letter, a number, and a special character.
-          </small>
-          <label htmlFor="register-role">Role</label>
-          <select
-            id="register-role"
-            value={registerForm.role}
-            onChange={(e) =>
-              setRegisterForm({ ...registerForm, role: e.target.value })
-            }
-            style={{ width: "100%", padding: "10px", marginBottom: "15px", borderRadius: "10px", border: "1px solid #cbd5e1", outline: "none", fontFamily: "inherit" }}
-          >
-            <option value="volunteer">General Volunteer</option>
-            <option value="core">Core Team</option>
-            <option value="participant">Participant</option>
-          </select>
-          <button type="submit" disabled={loadingRegister}>
-            {loadingRegister ? "Registering..." : "Register"}
-          </button>
-          {registerMessage && (
-            <div className={`alert-${registerMessage.type}`}>
-              {registerMessage.text}
-            </div>
-          )}
-          <p className="page-subtitle">
-            Already have an account?{" "}
-            <button
-              type="button"
-              className="link-button"
-              onClick={() => {
-                setAuthMode("login");
-                navigate("/login", { replace: true });
-              }}
-            >
-              Login
-            </button>
-          </p>
-        </form>
-      )}
-    </section>
+    <Login
+      authMode={authMode}
+      loginForm={loginForm}
+      onLoginFormChange={setLoginForm}
+      onLoginSubmit={handleLoginSubmit}
+      loadingLogin={loadingLogin}
+      loginMessage={loginMessage}
+      registerForm={registerForm}
+      onRegisterFormChange={setRegisterForm}
+      onRegisterSubmit={handleRegisterSubmit}
+      loadingRegister={loadingRegister}
+      registerMessage={registerMessage}
+      onSwitchToRegister={() => {
+        setAuthMode("register");
+        navigate("/login?mode=register", { replace: true });
+      }}
+      onSwitchToLogin={() => {
+        setAuthMode("login");
+        navigate("/login", { replace: true });
+      }}
+    />
   );
 
   const renderCreate = () => {
@@ -1133,10 +1029,12 @@ function App() {
   };
 
   const isLanding = currentPage === "landing";
+  const isLogin = currentPage === "login";
+  const isFullBleed = isLanding || isLogin;
 
   return (
-    <div className="app-shell">
-      {!isLanding && (
+    <div className={`app-shell${isLogin ? " app-shell--fullbleed" : ""}`}>
+      {!isFullBleed && (
         <>
           <div className="global-orb orb-1"></div>
           <div className="global-orb orb-2"></div>
@@ -1144,7 +1042,7 @@ function App() {
         </>
       )}
 
-      {!isLanding && (
+      {!isFullBleed && (
         <nav className="top-navbar">
           <h2 className="navbar-brand">
             <button
@@ -1182,11 +1080,17 @@ function App() {
         </nav>
       )}
 
-      <main
-        className={isLanding ? "page-content page-content--landing" : "page-content"}
-      >
-        {renderPage()}
-      </main>
+      {isLogin ? (
+        renderLogin()
+      ) : (
+        <main
+          className={
+            isLanding ? "page-content page-content--landing" : "page-content"
+          }
+        >
+          {renderPage()}
+        </main>
+      )}
     </div>
   );
 }
