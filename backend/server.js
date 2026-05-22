@@ -15,13 +15,10 @@ dotenv.config();
 connectDB();
 
 const app = express();
-const server = http.createServer(app);
-const io = new Server(server, {
-  cors: {
-    origin: "*",
-    methods: ["GET", "POST"]
-  }
-});
+
+// We'll create the HTTP server and Socket.IO instance inside startServer
+// so each listen attempt uses a fresh server and avoids double-listen errors.
+
 
 app.use(cors());
 app.use(express.json());
@@ -44,51 +41,90 @@ app.use('/api/auth', authRoutes);
 app.use('/api/event-prep', eventPrepRoutes);
 app.use('/api/groups', groupRoutes);
 
-io.on('connection', (socket) => {
-  socket.on('joinRoom', (groupId) => {
-    socket.join(groupId);
+function attachSocketHandlers(io) {
+  io.on('connection', (socket) => {
+    socket.on('joinRoom', (groupId) => {
+      socket.join(groupId);
+    });
+
+    socket.on('sendMessage', async (data) => {
+      try {
+        if (data.fileUrl) { // if the message was uploaded via REST as a file, we just emit it
+          io.to(data.groupId).emit('message', data);
+        } else {
+          const { groupId, sender, text } = data;
+          const newMsg = await Message.create({
+            groupId,
+            sender,
+            text,
+          });
+          const populatedMsg = await Message.findById(newMsg._id).populate('sender', 'name email role');
+          io.to(groupId).emit('message', populatedMsg);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    });
+
+    socket.on('messageDeleted', (data) => {
+      io.to(data.groupId).emit('messageDeleted', data.messageId);
+    });
+
+    socket.on('memberRemoved', (data) => {
+      io.to(data.groupId).emit('memberRemoved', data.memberId);
+    });
+
+    socket.on('disconnect', () => {
+      // disconnected
+    });
+  });
+}
+
+const PORT = parseInt(process.env.PORT, 10) || 5000;
+
+function startServer(port, attempts = 10) {
+  const server = http.createServer(app);
+  const io = new Server(server, {
+    cors: {
+      origin: '*',
+      methods: ['GET', 'POST'],
+    },
   });
 
-  socket.on('sendMessage', async (data) => {
-    try {
-      if (data.fileUrl) { // if the message was uploaded via REST as a file, we just emit it
-        io.to(data.groupId).emit('message', data);
-      } else {
-        const { groupId, sender, text } = data;
-        const newMsg = await Message.create({
-          groupId,
-          sender,
-          text,
+  attachSocketHandlers(io);
+
+  server.listen(port);
+
+  server.on('listening', () => {
+    console.log(`Server running on port ${port}`);
+  });
+
+  server.on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+      console.error(`Port ${port} is already in use. Trying port ${port + 1}...`);
+      // close current server and try next port
+      try {
+        server.close(() => {
+          if (attempts > 0) {
+            startServer(port + 1, attempts - 1);
+          } else {
+            console.error('No available ports found after multiple attempts. Exiting.');
+            process.exit(1);
+          }
         });
-        const populatedMsg = await Message.findById(newMsg._id).populate('sender', 'name email role');
-        io.to(groupId).emit('message', populatedMsg);
+      } catch (closeErr) {
+        if (attempts > 0) {
+          startServer(port + 1, attempts - 1);
+        } else {
+          console.error('No available ports found after multiple attempts. Exiting.');
+          process.exit(1);
+        }
       }
-    } catch (err) {
+    } else {
       console.error(err);
+      process.exit(1);
     }
   });
+}
 
-  socket.on('messageDeleted', (data) => {
-    io.to(data.groupId).emit('messageDeleted', data.messageId);
-  });
-
-  socket.on('memberRemoved', (data) => {
-    io.to(data.groupId).emit('memberRemoved', data.memberId);
-  });
-
-  socket.on('disconnect', () => {
-    // disconnected
-  });
-});
-
-const PORT = process.env.PORT || 5000;
-server.on("error", (err) => {
-  if (err.code === "EADDRINUSE") {
-    console.error(`Port ${PORT} is already in use. Stop the other process (netstat -ano | findstr :${PORT}) or set PORT.`);
-    process.exit(1);
-  }
-  throw err;
-});
-server.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+startServer(PORT);

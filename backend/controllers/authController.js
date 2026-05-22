@@ -66,10 +66,35 @@ const loginUser = async (req, res) => {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
-      return res.status(401).json({ message: 'Invalid credentials' });
-    }
+      let isPasswordValid = false;
+
+      // If password appears to be a bcrypt hash (starts with $2), compare normally.
+      try {
+        if (user.password && typeof user.password === 'string' && user.password.startsWith('$2')) {
+          isPasswordValid = await bcrypt.compare(password, user.password);
+        } else {
+          // Handle legacy plaintext-stored passwords: compare directly and migrate to bcrypt.
+          isPasswordValid = password === user.password;
+          if (isPasswordValid) {
+            const hashed = await bcrypt.hash(password, 10);
+            // Update user password to hashed value for future logins
+            user.password = hashed;
+            try {
+              await user.save();
+            } catch (saveErr) {
+              console.error('Failed to migrate plaintext password to hashed:', saveErr);
+            }
+          }
+        }
+      } catch (compareErr) {
+        console.error('Password comparison error:', compareErr);
+        return res.status(500).json({ message: 'Failed to verify credentials' });
+      }
+
+      if (!isPasswordValid) {
+        console.warn(`Failed login attempt for email=${email}`);
+        return res.status(401).json({ message: 'Invalid credentials' });
+      }
 
     const token = generateToken(user._id);
 
