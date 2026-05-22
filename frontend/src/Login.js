@@ -44,7 +44,7 @@ function IconInput({ id, label, type = "text", value, onChange, icon: Icon, requ
           onChange={onChange}
           required={required}
           placeholder={placeholder}
-          className={`w-full rounded-xl border border-slate-800 bg-slate-950/40 py-3.5 pl-12 text-base text-white placeholder-slate-500 outline-none transition-all duration-300 focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 ${rightSlot ? "pr-11" : "pr-4"}`}
+          className={`w-full rounded-xl border border-slate-800 bg-slate-950/40 py-3.5 pl-12 text-base text-white placeholder-slate-500 outline-none transition-all duration-300 focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 focus:bg-slate-900/80 ${rightSlot ? "pr-11" : "pr-4"}`}
         />
         {rightSlot && <div className="absolute right-4 top-1/2 -translate-y-1/2">{rightSlot}</div>}
       </div>
@@ -278,7 +278,7 @@ export default function Login({
           id="register-role"
           value={registerForm.role}
           onChange={(e) => onRegisterFormChange({ ...registerForm, role: e.target.value })}
-          className="w-full rounded-xl border border-slate-800 bg-slate-950/60 px-4 py-3.5 text-base text-slate-200 outline-none transition-all duration-300 focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20"
+          className="w-full rounded-xl border border-slate-800 bg-slate-950/60 px-4 py-3.5 text-base text-slate-200 outline-none transition-all duration-300 focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 focus:bg-slate-900/80"
         >
           <option value="volunteer">General Volunteer</option>
           <option value="core">Core Team</option>

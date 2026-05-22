@@ -46,22 +46,20 @@ const registerUser = async (req, res) => {
       },
     });
   } catch (error) {
+    console.error('Registration error:', error);
     return res.status(500).json({ message: 'Failed to register user' });
   }
 };
 
 const loginUser = async (req, res) => {
   try {
-    let { email, password } = req.body; console.log('Login attempt:', req.body);
+    let { email, password } = req.body;
 
     if (!email || !password) {
       return res.status(400).json({ message: 'Please provide email and password' });
     }
 
     email = email.toLowerCase().trim();
-    if (typeof password === 'string') {
-      password = password.trim();
-    }
 
     const user = await User.findOne({ email });
     if (!user) {
@@ -85,6 +83,7 @@ const loginUser = async (req, res) => {
       },
     });
   } catch (error) {
+    console.error('Login error:', error);
     return res.status(500).json({ message: 'Failed to login user' });
   }
 };

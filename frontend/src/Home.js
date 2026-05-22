@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Footer from './Footer';
 import './Home.css';
 
 function Home({ currentUser, events = [] }) {
   const navigate = useNavigate();
+  const [showExploreModal, setShowExploreModal] = useState(false);
   const firstName = currentUser?.name ? currentUser.name.split(' ')[0] : 'User';
 
   const upcomingEvent = events.length > 0 ? events[0] : null;
@@ -109,7 +110,7 @@ function Home({ currentUser, events = [] }) {
               <span>Join a Group</span>
               <span className="arrow">›</span>
             </li>
-            <li onClick={() => navigate('/home')}>
+            <li onClick={() => setShowExploreModal(true)}>
               <div className="action-icon action-explore"><span className="icon">📅</span></div>
               <span>Explore Events</span>
               <span className="arrow">›</span>
@@ -118,6 +119,33 @@ function Home({ currentUser, events = [] }) {
         </div>
       </div>
       <Footer />
+
+      {/* Explore Events Modal */}
+      {showExploreModal && (
+        <div className="explore-modal-overlay" onClick={() => setShowExploreModal(false)}>
+          <div className="explore-modal-content" onClick={e => e.stopPropagation()}>
+            <div className="explore-modal-header">
+              <h2>All Events</h2>
+              <button className="explore-close-btn" onClick={() => setShowExploreModal(false)}>&times;</button>
+            </div>
+            <div className="explore-modal-body">
+              {events.length === 0 ? (
+                <p style={{color: '#94a3b8', textAlign: 'center'}}>No events available right now.</p>
+              ) : (
+                events.map(ev => (
+                  <div key={ev._id || ev.id} className="explore-event-card">
+                    <h4>{ev.title}</h4>
+                    <p className="explore-event-meta">
+                      <span><span className="icon">📍</span> {ev.location || 'Online'}</span> 
+                      <span><span className="icon">🗓️</span> {new Date(ev.date).toLocaleDateString()}</span>
+                    </p>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

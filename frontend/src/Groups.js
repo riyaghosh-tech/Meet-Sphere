@@ -141,17 +141,54 @@ function Groups({ apiBase, getToken, getErrorMessage, currentUser, onNavigateLog
     }
   };
 
-  const handleSendMessage = (e) => {
+  const handleSendMessage = async (e) => {
     e.preventDefault();
     if (!messageInput.trim() || !socketRef.current) return;
+    
+    const userInput = messageInput;
+    
+    // Immediately send user's message
     socketRef.current.emit('sendMessage', {
       groupId: activeGroup._id,
       sender: currentUser.id || currentUser._id,
-      text: messageInput
+      text: userInput
     });
+    
     setMessageInput('');
     const ta = document.getElementById('chat-textarea');
     if (ta) ta.style.height = '48px';
+
+    // If message starts with @ai, trigger the AI assistant
+    if (userInput.trim().toLowerCase().startsWith('@ai')) {
+      const prompt = userInput.replace(/^@ai\s*/i, '').trim();
+      if (!prompt) return;
+
+      try {
+        const response = await axios.post(
+          `${apiBase}/api/groups/ai`,
+          { prompt },
+          { headers: authHeaders() }
+        );
+
+        const aiText = response.data.reply;
+
+        socketRef.current.emit('sendMessage', {
+          groupId: activeGroup._id,
+          sender: currentUser.id || currentUser._id,
+          text: `🤖 **AI Assistant:**\n${aiText}`
+        });
+      } catch (err) {
+        const friendly = getErrorMessage(
+          err,
+          'The AI assistant is unavailable right now. Check server configuration or OpenAI billing.'
+        );
+        socketRef.current.emit('sendMessage', {
+          groupId: activeGroup._id,
+          sender: currentUser.id || currentUser._id,
+          text: `🤖 **AI Error:** ${friendly}`
+        });
+      }
+    }
   };
 
   const handleFileUpload = async (e) => {
@@ -218,8 +255,8 @@ function Groups({ apiBase, getToken, getErrorMessage, currentUser, onNavigateLog
     }
 
     return (
-      <section className="groups-page chat-layout">
-        <div className="chat-header glass-card">
+      <section className="groups-page chat-layout glass-card">
+        <div className="chat-header">
           <div className="chat-header-info" style={{ position: 'relative' }}>
             <button className="back-btn" onClick={() => setActiveGroup(null)}>← Back</button>
             <h2>{activeGroup.name}</h2>
@@ -238,7 +275,7 @@ function Groups({ apiBase, getToken, getErrorMessage, currentUser, onNavigateLog
           </button>
         </div>
         
-        <div className="chat-messages glass-card">
+        <div className="chat-messages">
           {messages.map((m, idx) => {
             const currentId = currentUser.id || currentUser._id;
             const senderId = m.sender?._id || m.sender?.id || m.sender;
@@ -303,7 +340,7 @@ function Groups({ apiBase, getToken, getErrorMessage, currentUser, onNavigateLog
           </div>
         )}
 
-          <form className="chat-input-area glass-card" onSubmit={handleSendMessage}>
+          <form className="chat-input-area" onSubmit={handleSendMessage}>
             <input type="file" ref={fileInputRef} onChange={handleFileUpload} style={{ display: 'none' }} accept="image/*,video/*,application/pdf" />
             <button type="button" className="attach-btn" onClick={() => fileInputRef.current.click()} disabled={uploading}>
               {uploading ? "⏳" : "📎"}
@@ -316,9 +353,11 @@ function Groups({ apiBase, getToken, getErrorMessage, currentUser, onNavigateLog
                 e.target.style.height = '48px';
                 e.target.style.height = Math.min(e.target.scrollHeight, 120) + 'px';
               }} 
-              placeholder="Type your message..." 
+              placeholder="Type your message... (Start with @ai to ask the AI Assistant)" 
             />
-            <button type="submit" className="send-btn" disabled={!messageInput.trim()}>Send</button>
+            <button type="submit" className="send-btn" disabled={!messageInput.trim()}>
+              ➤
+            </button>
           </form>
       </section>
     );
@@ -354,7 +393,7 @@ function Groups({ apiBase, getToken, getErrorMessage, currentUser, onNavigateLog
               <div className="group-card-actions">
                 {isMember ? (
                   <>
-                    <button className="join-chat-btn" onClick={() => setActiveGroup(g)}>Enter Chat</button>
+                    <button className="join-chat-btn" onClick={() => setActiveGroup(g)}>Join</button>
                     <button className="leave-group-btn" onClick={(e) => handleJoinLeave(e, g._id, 'leave')}>Leave</button>
                   </>
                 ) : (

@@ -1,66 +1,38 @@
-import { useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect, useMemo } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import './EventList.css';
 
-const events = [
-  {
-    id: 1,
-    title: 'City Music Evening',
-    date: 'April 18, 2026',
-    location: 'Riverfront Stage',
-    category: 'Music',
-    image: 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?q=80&w=400&h=200&fit=crop',
-  },
-  {
-    id: 2,
-    title: 'Community Tech Workshop',
-    date: 'April 22, 2026',
-    location: 'Innovation Hub',
-    category: 'Workshop',
-    image: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?q=80&w=400&h=200&fit=crop',
-  },
-  {
-    id: 3,
-    title: 'Weekend Football Meetup',
-    date: 'April 27, 2026',
-    location: 'Greenfield Stadium',
-    category: 'Sports',
-    image: 'https://images.unsplash.com/photo-1508344928928-7165b67de128?q=80&w=400&h=200&fit=crop',
-  },
-  {
-    id: 4,
-    title: 'Art and Craft Showcase',
-    date: 'May 02, 2026',
-    location: 'Civic Art Center',
-    category: 'Art',
-    image: 'https://images.unsplash.com/photo-1460518451285-8f6920f04f2f?q=80&w=400&h=200&fit=crop',
-  },
-  {
-    id: 5,
-    title: 'Open Mic Night',
-    date: 'May 09, 2026',
-    location: 'Downtown Cafe',
-    category: 'Music',
-    image: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=400&h=200&fit=crop',
-  },
-  {
-    id: 6,
-    title: 'Startup Networking Session',
-    date: 'May 14, 2026',
-    location: 'Metro Co-Working Space',
-    category: 'Networking',
-    image: 'https://images.unsplash.com/photo-1515187029135-18ee286d815b?q=80&w=400&h=200&fit=crop',
-  },
-];
-
 function EventList() {
-  const categories = useMemo(
-    () => ['All', ...new Set(events.map((event) => event.category))],
-    []
-  );
+  const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [searchTitle, setSearchTitle] = useState('');
   const [searchLocation, setSearchLocation] = useState('');
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const res = await fetch('http://localhost:5000/api/events');
+        if (!res.ok) throw new Error('Failed to fetch events');
+        const data = await res.json();
+        setEvents(data);
+      } catch (err) {
+        console.error(err);
+        setError('Failed to load events.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchEvents();
+  }, []);
+
+  const categories = useMemo(
+    () => ['All', ...new Set(events.map((event) => event.category))],
+    [events]
+  );
 
   const filteredEvents = useMemo(() => {
     return events.filter((event) => {
@@ -69,13 +41,52 @@ function EventList() {
       const matchesLocation = event.location.toLowerCase().includes(searchLocation.toLowerCase());
       return matchesCategory && matchesTitle && matchesLocation;
     });
-  }, [selectedCategory, searchTitle, searchLocation]);
+  }, [events, selectedCategory, searchTitle, searchLocation]);
+
+  const handleJoinEvent = async (e, eventId) => {
+    e.stopPropagation(); // Prevent card click
+    
+    const token = localStorage.getItem('token');
+    if (!token) {
+      navigate('/login');
+      return;
+    }
+
+    try {
+      const res = await fetch(`http://localhost:5000/api/events/join/${eventId}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      const data = await res.json();
+      
+      if (!res.ok) {
+        alert(data.message || 'Failed to join event');
+        return;
+      }
+      
+      // Navigate to dashboard upon successful join
+      navigate('/dashboard');
+    } catch (err) {
+      console.error(err);
+      alert('Error joining event.');
+    }
+  };
+
+  if (loading) {
+    return <main className="event-list-page"><p style={{textAlign: 'center', marginTop: '2rem'}}>Loading events...</p></main>;
+  }
+
+  if (error) {
+    return <main className="event-list-page"><p style={{textAlign: 'center', marginTop: '2rem', color: 'red'}}>{error}</p></main>;
+  }
 
   return (
     <main className="event-list-page">
       <section className="event-list-wrapper">
         <div className="event-list-header">
-          <h1 className="event-list-title">Event List</h1>
+          <h1 className="event-list-title">Explore Events</h1>
           <p className="event-list-subtitle">
             Explore local events and join what interests you
           </p>
@@ -117,12 +128,22 @@ function EventList() {
         ) : (
           <div className="event-grid">
             {filteredEvents.map((event) => (
-              <article className="event-card" key={event.id}>
-                <img src={event.image} alt={event.title} className="event-image" />
+              <article 
+                className="event-card" 
+                key={event._id} 
+                onClick={() => navigate(`/event/${event._id}`)}
+                style={{ cursor: 'pointer' }}
+              >
+                {/* Fallback image if event has no image */}
+                <img 
+                  src={event.image || 'https://images.unsplash.com/photo-1531482615713-2afd69097998?q=80&w=400&h=200&fit=crop'} 
+                  alt={event.title} 
+                  className="event-image" 
+                />
                 <div className="event-content">
                   <h2 className="event-title">{event.title}</h2>
                   <p className="event-info">
-                    <span className="info-label">Date:</span> {event.date}
+                    <span className="info-label">Date:</span> {new Date(event.date).toLocaleDateString()}
                   </p>
                   <p className="event-info">
                     <span className="info-label">Location:</span> {event.location}
@@ -130,9 +151,13 @@ function EventList() {
                   <p className="event-info">
                     <span className="info-label">Category:</span> {event.category}
                   </p>
-                  <Link className="join-button" to={`/event/${event.id}`}>
+                  <button 
+                    className="join-button" 
+                    onClick={(e) => handleJoinEvent(e, event._id)}
+                    style={{ border: 'none', width: '100%' }}
+                  >
                     Join
-                  </Link>
+                  </button>
                 </div>
               </article>
             ))}

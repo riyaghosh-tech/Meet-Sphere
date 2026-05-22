@@ -1,59 +1,62 @@
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './Dashboard.css';
 
 function Dashboard() {
-  const createdEvents = [
-    {
-      id: 1,
-      title: 'Community Coding Meetup',
-      date: 'April 25, 2026',
-      location: 'Tech Hub Center',
-      category: 'Workshop',
-    },
-    {
-      id: 2,
-      title: 'Neighborhood Fitness Camp',
-      date: 'May 03, 2026',
-      location: 'Sunrise Park',
-      category: 'Sports',
-    },
-    {
-      id: 3,
-      title: 'Local Art Exhibition',
-      date: 'May 10, 2026',
-      location: 'City Art Hall',
-      category: 'Art',
-    },
-  ];
+  const [createdEvents, setCreatedEvents] = useState([]);
+  const [joinedEvents, setJoinedEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
 
-  const joinedEvents = [
-    {
-      id: 4,
-      title: 'Weekend Music Jam',
-      date: 'April 20, 2026',
-      location: 'Riverfront Stage',
-      category: 'Music',
-    },
-    {
-      id: 5,
-      title: 'Startup Networking Night',
-      date: 'May 08, 2026',
-      location: 'Innovation Lounge',
-      category: 'Networking',
-    },
-    {
-      id: 6,
-      title: 'Community Cleanup Drive',
-      date: 'May 15, 2026',
-      location: 'Greenwood District',
-      category: 'Social',
-    },
-  ];
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        navigate('/login');
+        return;
+      }
+
+      try {
+        const [createdRes, joinedRes] = await Promise.all([
+          fetch('http://localhost:5000/api/events/me', {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          fetch('http://localhost:5000/api/events/joined', {
+            headers: { Authorization: `Bearer ${token}` },
+          })
+        ]);
+
+        if (!createdRes.ok || !joinedRes.ok) {
+          throw new Error('Failed to fetch dashboard data');
+        }
+
+        const createdData = await createdRes.json();
+        const joinedData = await joinedRes.json();
+
+        // Ensure we don't duplicate events if user created and joined the same event
+        // (the backend `createEvent` adds creator to `participants`)
+        const createdIds = new Set(createdData.map(e => e._id));
+        const filteredJoined = joinedData.filter(e => !createdIds.has(e._id));
+
+        setCreatedEvents(createdData);
+        setJoinedEvents(filteredJoined);
+      } catch (err) {
+        console.error(err);
+        setError('Failed to load dashboard data.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, [navigate]);
 
   const renderCard = (event) => (
-    <article className="event-card" key={event.id}>
+    <article className="event-card" key={event._id}>
       <h3 className="event-title">{event.title}</h3>
       <p className="event-meta">
-        <span className="meta-label">Date:</span> {event.date}
+        <span className="meta-label">Date:</span> {new Date(event.date).toLocaleDateString()}
       </p>
       <p className="event-meta">
         <span className="meta-label">Location:</span> {event.location}
@@ -64,17 +67,45 @@ function Dashboard() {
     </article>
   );
 
+  if (loading) {
+    return (
+      <div className="dashboard-page">
+        <div className="dashboard-content" style={{textAlign: 'center', marginTop: '2rem'}}>
+          Loading dashboard...
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="dashboard-page">
+        <div className="dashboard-content" style={{textAlign: 'center', marginTop: '2rem', color: 'red'}}>
+          {error}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="dashboard-page">
       <main className="dashboard-content">
         <section className="dashboard-section">
           <h2 className="section-title">My Created Events</h2>
-          <div className="events-grid">{createdEvents.map(renderCard)}</div>
+          {createdEvents.length > 0 ? (
+            <div className="events-grid">{createdEvents.map(renderCard)}</div>
+          ) : (
+            <p>You haven't created any events yet.</p>
+          )}
         </section>
 
         <section className="dashboard-section">
           <h2 className="section-title">Joined Events</h2>
-          <div className="events-grid">{joinedEvents.map(renderCard)}</div>
+          {joinedEvents.length > 0 ? (
+            <div className="events-grid">{joinedEvents.map(renderCard)}</div>
+          ) : (
+            <p>You haven't joined any events yet.</p>
+          )}
         </section>
       </main>
     </div>

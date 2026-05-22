@@ -31,6 +31,14 @@ app.get('/', (req, res) => {
   res.json({ message: 'Community Event Platform API is running' });
 });
 
+app.get('/api/health', (req, res) => {
+  const mongoReady = require('mongoose').connection.readyState === 1;
+  res.status(mongoReady ? 200 : 503).json({
+    ok: mongoReady,
+    mongo: mongoReady ? 'connected' : 'disconnected',
+  });
+});
+
 app.use('/api/events', eventRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/event-prep', eventPrepRoutes);
@@ -74,6 +82,13 @@ io.on('connection', (socket) => {
 });
 
 const PORT = process.env.PORT || 5000;
+server.on("error", (err) => {
+  if (err.code === "EADDRINUSE") {
+    console.error(`Port ${PORT} is already in use. Stop the other process (netstat -ano | findstr :${PORT}) or set PORT.`);
+    process.exit(1);
+  }
+  throw err;
+});
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

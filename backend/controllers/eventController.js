@@ -5,7 +5,23 @@ const getEvents = async (req, res) => {
     const events = await Event.find().populate('participants', 'name email role').populate('createdBy', 'name email role').sort({ createdAt: -1 });
     res.status(200).json(events);
   } catch (error) {
+    console.error("getEvents error:", error);
     res.status(500).json({ message: 'Failed to fetch events' });
+  }
+};
+
+const getEventById = async (req, res) => {
+  try {
+    const event = await Event.findById(req.params.id)
+      .populate('participants', 'name email role')
+      .populate('createdBy', 'name email role');
+    if (!event) {
+      return res.status(404).json({ message: 'Event not found' });
+    }
+    res.status(200).json(event);
+  } catch (error) {
+    console.error("getEventById error:", error);
+    res.status(500).json({ message: 'Failed to fetch event details' });
   }
 };
 
@@ -162,6 +178,7 @@ const removeParticipant = async (req, res) => {
 
 module.exports = {
   getEvents,
+  getEventById,
   createEvent,
   joinEvent,
   getMyEvents,

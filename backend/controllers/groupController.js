@@ -1,5 +1,13 @@
 const Group = require('../models/Group');
 const Message = require('../models/Message');
+const {
+  hasGeminiKey,
+  callGeminiChat,
+  handleGeminiRouteError,
+} = require('../utils/geminiClient');
+
+const GROUP_AI_SYSTEM =
+  'You are a helpful AI assistant in a MeetSphere collaboration group chat. Keep answers concise and practical.';
 
 // Fetch all groups where user is a member or open to join
 const getGroups = async (req, res) => {
@@ -171,6 +179,38 @@ const deleteMessage = async (req, res) => {
   }
 };
 
+const groupAiAssist = async (req, res) => {
+  try {
+    const { prompt } = req.body;
+    if (!prompt || !String(prompt).trim()) {
+      return res.status(400).json({ message: 'Prompt is required' });
+    }
+
+    const text = String(prompt).trim();
+
+    if (!hasGeminiKey()) {
+      return res.status(200).json({
+        reply:
+          `**Demo mode:** AI is not configured on the server. Add \`GEMINI_API_KEY\` to the backend \`.env\` file.\n\n` +
+          `For your question (“${text}”), try breaking it into smaller tasks and assigning owners in your group.`,
+        demo: true,
+      });
+    }
+
+    const reply = await callGeminiChat(
+      [
+        { role: 'system', content: GROUP_AI_SYSTEM },
+        { role: 'user', content: text },
+      ],
+      { max_tokens: 1024, temperature: 0.7 }
+    );
+
+    return res.status(200).json({ reply });
+  } catch (error) {
+    return handleGeminiRouteError(error, res, 'AI assistant request failed');
+  }
+};
+
 module.exports = {
   getGroups,
   createGroup,
@@ -180,4 +220,5 @@ module.exports = {
   uploadFileMessage,
   removeMember,
   deleteMessage,
+  groupAiAssist,
 };

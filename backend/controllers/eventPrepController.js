@@ -1,8 +1,10 @@
 const mongoose = require('mongoose');
 const EventPrep = require('../models/EventPrep');
-
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-const OPENAI_MODEL = process.env.OPENAI_MODEL || 'gpt-4o-mini';
+const {
+  hasGeminiKey,
+  callGeminiChat,
+  handleGeminiRouteError,
+} = require('../utils/geminiClient');
 
 const SYSTEM_PROMPT = `You are an expert event-planning AI assistant for MeetSphere. Your job is to turn an event name and organizer notes into a practical, actionable event prep package.
 
@@ -166,7 +168,7 @@ ${details}
 
 ---
 
-*Demo mode (API Key not configured): The above blueprint was generated dynamically based on your keywords. Add \`OPENAI_API_KEY\` to backend \`.env\` for full AI-generated blueprints.*`;
+*Demo mode (API Key not configured): The above blueprint was generated dynamically based on your keywords. Add \`GEMINI_API_KEY\` to backend \`.env\` for full AI-generated blueprints.*`;
 }
 
 function buildDemoReply(eventName, eventDetails, messages) {
@@ -217,35 +219,10 @@ function buildDemoReply(eventName, eventDetails, messages) {
       recommendation = "For AV and technical setups, demand a full run-through 2 hours before doors open. Always bring backup adapters, HDMI cables, and an offline copy of your playlists/presentations.";
     }
 
-    return `**Assistant Recommendation:**\n\n${recommendation}\n\n*(Note: This is a dynamically generated response in demo mode. For true AI reasoning, add your \`OPENAI_API_KEY\` to the \`.env\` file.)*`;
+    return `**Assistant Recommendation:**\n\n${recommendation}\n\n*(Note: This is a dynamically generated response in demo mode. For true AI reasoning, add your \`GEMINI_API_KEY\` to the \`.env\` file.)*`;
   }
   
   return buildDemoBlueprint(eventName, eventDetails);
-}
-
-async function callOpenAI(chatMessages) {
-  const res = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${OPENAI_API_KEY}`,
-    },
-    body: JSON.stringify({
-      model: OPENAI_MODEL,
-      messages: chatMessages,
-      temperature: 0.65,
-      max_tokens: 4096,
-    }),
-  });
-
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) {
-    const msg = data.error?.message || res.statusText || 'OpenAI request failed';
-    throw new Error(msg);
-  }
-  const text = data.choices?.[0]?.message?.content;
-  if (!text) throw new Error('Empty response from AI');
-  return text;
 }
 
 const chatPrep = async (req, res) => {
@@ -283,8 +260,8 @@ const chatPrep = async (req, res) => {
     let reply;
     let demo = false;
 
-    if (OPENAI_API_KEY) {
-      reply = await callOpenAI(chatMessages);
+    if (hasGeminiKey()) {
+      reply = await callGeminiChat(chatMessages);
     } else {
       reply = buildDemoReply(name, details, messages);
       demo = true;
@@ -292,9 +269,7 @@ const chatPrep = async (req, res) => {
 
     return res.status(200).json({ reply, demo });
   } catch (error) {
-    return res.status(500).json({
-      message: error.message || 'Failed to generate event prep',
-    });
+    return handleGeminiRouteError(error, res, 'Failed to generate event prep');
   }
 };
 

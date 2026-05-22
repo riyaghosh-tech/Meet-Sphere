@@ -6,6 +6,9 @@ import Landing from "./Landing";
 import Login from "./Login";
 import EventPrep from "./EventPrep";
 import Groups from "./Groups";
+import Profile from "./Profile";
+import CreateEvent from "./CreateEvent";
+import { getErrorMessage } from "./apiErrors";
 
 const PATH_TO_PAGE = {
   "/": "landing",
@@ -15,6 +18,7 @@ const PATH_TO_PAGE = {
   "/dashboard": "dashboard",
   "/event-prep": "eventPrep",
   "/chatbox": "chatbox",
+  "/profile": "profile",
 };
 
 /**
@@ -148,18 +152,6 @@ function App() {
   const [registerMessage, setRegisterMessage] = useState(null);
   const [loadingRegister, setLoadingRegister] = useState(false);
 
-  const getErrorMessage = (err, fallbackMessage) => {
-    if (err.response?.data?.message) return err.response.data.message;
-    if (!err.response) {
-      const msg = err.message || "";
-      if (msg === "Network Error" || err.code === "ERR_NETWORK") {
-        return "Cannot reach the server. Start the backend: open a terminal in the backend folder and run npm start (port 5000), then try again.";
-      }
-    }
-    if (err.message) return err.message;
-    return fallbackMessage;
-  };
-
   const [createForm, setCreateForm] = useState({
     title: "",
     date: "",
@@ -187,6 +179,8 @@ function App() {
   const [dashboardEdit, setDashboardEdit] = useState(null);
   const [dashboardSaving, setDashboardSaving] = useState(false);
   const [dashboardMessage, setDashboardMessage] = useState(null);
+
+  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
 
   // ✅ Fetch events from backend
   useEffect(() => {
@@ -1012,7 +1006,7 @@ function App() {
       case "login":
         return renderLogin();
       case "create":
-        return renderCreate();
+        return <CreateEvent currentUser={currentUser} />;
       case "dashboard":
         return renderDashboard();
       case "eventPrep":
@@ -1035,6 +1029,8 @@ function App() {
             onNavigateLogin={() => navigate("/login")}
           />
         );
+      case "profile":
+        return <Profile currentUser={currentUser} />;
       default:
         return <Landing />;
     }
@@ -1046,20 +1042,54 @@ function App() {
 
   return (
     <div 
-      className={`app-shell${isLogin ? " app-shell--fullbleed" : ""}${currentPage === "home" ? " bg-slate-950 text-slate-100" : ""}`}
+      className={`app-shell${isLogin ? " app-shell--fullbleed" : ""}${(currentPage === "home" || currentPage === "create" || currentPage === "dashboard" || currentPage === "chatbox" || currentPage === "eventPrep" || currentPage === "profile") ? " bg-slate-950 text-slate-100" : ""}`}
     >
       {currentPage === "home" && (
         <>
-          {/* Premium background grid overlay (from Login) */}
-          <div className="absolute inset-0 bg-[linear-gradient(to_right,#0f172a_1px,transparent_1px),linear-gradient(to_bottom,#0f172a_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-40 pointer-events-none" />
+          {/* Premium background grid overlay (from Login) - Animated for Create Page */}
+          <div className={`absolute inset-0 bg-[linear-gradient(to_right,#0f172a_1px,transparent_1px),linear-gradient(to_bottom,#0f172a_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-40 pointer-events-none ${currentPage === "create" ? "animate-grid-movement" : ""}`} />
           
-          {/* Glowing backdrop aurora spheres (from Login) */}
-          <div className="absolute -top-40 -left-40 h-[600px] w-[600px] rounded-full bg-violet-600/5 blur-[120px] pointer-events-none" />
-          <div className="absolute -bottom-40 -right-40 h-[600px] w-[600px] rounded-full bg-rose-600/5 blur-[120px] pointer-events-none" />
+          {/* Glowing backdrop aurora spheres (from Login) - Animated for Create Page */}
+          <div className={`absolute -top-40 -left-40 h-[600px] w-[600px] rounded-full bg-violet-600/5 blur-[120px] pointer-events-none ${currentPage === "create" ? "animate-aurora-1" : ""}`} />
+          <div className={`absolute -bottom-40 -right-40 h-[600px] w-[600px] rounded-full bg-rose-600/5 blur-[120px] pointer-events-none ${currentPage === "create" ? "animate-aurora-2" : ""}`} />
         </>
       )}
 
-      {!isFullBleed && currentPage !== "home" && (
+      {(currentPage === "create" || currentPage === "dashboard" || currentPage === "chatbox" || currentPage === "eventPrep" || currentPage === "profile") && (
+        <div className="dashboard-bubble-bg overflow-hidden absolute inset-0 pointer-events-none z-0">
+          {/* Multi-colored Random Popping Bubbles */}
+          {[...Array(35)].map((_, i) => {
+             const size = Math.random() * 50 + 20; // 20px to 70px
+             const colors = [
+               'rgba(59, 130, 246, 0.2)',  // Blue
+               'rgba(168, 85, 247, 0.2)',  // Purple
+               'rgba(236, 72, 153, 0.2)',  // Pink
+               'rgba(16, 185, 129, 0.2)',  // Emerald
+               'rgba(147, 51, 234, 0.2)',  // Violet
+               'rgba(6, 182, 212, 0.2)'    // Cyan
+             ];
+             const randomColor = colors[Math.floor(Math.random() * colors.length)];
+             
+             return (
+               <div 
+                 key={i} 
+                 className="floating-bubble" 
+                 style={{
+                   left: `${Math.random() * 100}%`,
+                   top: `${Math.random() * 100}%`,
+                   width: `${size}px`,
+                   height: `${size}px`,
+                   background: `radial-gradient(circle at 30% 30%, ${randomColor}, transparent)`,
+                   animationDuration: `${Math.random() * 6 + 4}s`, // Pop up speed (4s to 10s)
+                   animationDelay: `${Math.random() * 10}s` // Stagger them heavily
+                 }}
+               ></div>
+             );
+          })}
+        </div>
+      )}
+
+      {!isFullBleed && currentPage !== "home" && currentPage !== "create" && currentPage !== "dashboard" && currentPage !== "profile" && (
         <>
           <div className="global-orb orb-1"></div>
           <div className="global-orb orb-2"></div>
@@ -1105,12 +1135,49 @@ function App() {
             <button type="button" className="icon-btn notification-btn">
               🔔<span className="badge-count">3</span>
             </button>
-            <div className="user-profile-nav">
-              <div className="avatar-circle">
-                {currentUser?.name ? currentUser.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'U'}
+            <div className="relative">
+              <div className="user-profile-nav" onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}>
+                <div className="avatar-circle">
+                  {currentUser?.name ? currentUser.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'U'}
+                </div>
+                <span className="user-name">{currentUser?.name || "User"}</span>
+                <span className="dropdown-arrow" style={{ transform: profileDropdownOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}>▼</span>
               </div>
-              <span className="user-name">{currentUser?.name || "User"}</span>
-              <span className="dropdown-arrow">▼</span>
+              {profileDropdownOpen && (
+                <div className="absolute right-0 mt-2 w-48 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xl overflow-hidden z-[100] transition-all">
+                  {currentUser && (
+                    <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800">
+                      <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 truncate">{currentUser.name}</p>
+                      <p className="text-xs text-slate-500 truncate">{currentUser.email || 'user@example.com'}</p>
+                    </div>
+                  )}
+                  <div className="py-1">
+                    <button 
+                      type="button"
+                      onClick={() => {
+                        setProfileDropdownOpen(false);
+                        navigate("/profile");
+                      }}
+                      className="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+                    >
+                      Your Profile
+                    </button>
+                    <button 
+                      type="button"
+                      onClick={() => {
+                        setProfileDropdownOpen(false);
+                        localStorage.removeItem("token");
+                        localStorage.removeItem("user");
+                        setCurrentUser(null);
+                        navigate("/login");
+                      }}
+                      className="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+                    >
+                      Sign out
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
             {!currentUser && (
                <button type="button" className="nav-link" onClick={() => navigate("/login")}>

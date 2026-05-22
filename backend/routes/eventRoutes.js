@@ -2,6 +2,7 @@ const express = require('express');
 const {
   createEvent,
   getEvents,
+  getEventById,
   getJoinedEvents,
   getMyEvents,
   joinEvent,
@@ -16,6 +17,7 @@ const router = express.Router();
 router.get('/', getEvents);
 router.get('/my-events', protect, getMyEvents);
 router.get('/joined-events', protect, getJoinedEvents);
+router.get('/:id', getEventById);
 router.post('/create', protect, createEvent);
 router.post('/join/:eventId', protect, joinEvent);
 router.put('/:id', protect, updateEvent);

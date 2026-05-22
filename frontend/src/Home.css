@@ -15,7 +15,6 @@
   flex-direction: column;
   gap: 40px;
   position: relative;
-  overflow: hidden;
   min-height: 100vh;
 }
 
@@ -359,4 +358,96 @@
   .hero-heading {
     font-size: 2.5rem;
   }
+}
+/* --- Explore Events Modal --- */
+.explore-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 6, 23, 0.8);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.explore-modal-content {
+  background: rgba(15, 23, 42, 0.95);
+  border: 1px solid rgba(168, 85, 247, 0.4);
+  border-radius: 16px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8), 0 0 20px rgba(168, 85, 247, 0.2);
+  animation: modalPopIn 0.3s ease-out forwards;
+}
+
+@keyframes modalPopIn {
+  from { transform: scale(0.9); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.explore-modal-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.explore-modal-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #fff;
+}
+
+.explore-close-btn {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.explore-close-btn:hover {
+  color: #fff;
+}
+
+.explore-modal-body {
+  padding: 24px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.explore-event-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 16px;
+  transition: background 0.2s;
+}
+
+.explore-event-card:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.explore-event-card h4 {
+  margin: 0 0 8px 0;
+  color: #a78bfa;
+  font-size: 1.1rem;
+}
+
+.explore-event-meta {
+  margin: 0;
+  color: #94a3b8;
+  font-size: 0.9rem;
+  display: flex;
+  gap: 12px;
+  align-items: center;
 }

@@ -10,6 +10,7 @@ const {
   uploadFileMessage,
   removeMember,
   deleteMessage,
+  groupAiAssist,
 } = require('../controllers/groupController');
 const { protect } = require('../middleware/authMiddleware');
 
@@ -38,6 +39,7 @@ const fileFilter = (req, file, cb) => {
 const upload = multer({ storage: storage, fileFilter: fileFilter, limits: { fileSize: 20 * 1024 * 1024 } }); // 20 MB max
 
 router.get('/', protect, getGroups);
+router.post('/ai', protect, groupAiAssist);
 router.post('/create', protect, createGroup);
 router.post('/:id/join', protect, joinGroup);
 router.post('/:id/leave', protect, leaveGroup);
