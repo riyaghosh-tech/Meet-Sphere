@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { API_BASE } from './config';
 import './Dashboard.css';
 
 function Dashboard() {
@@ -19,10 +20,10 @@ function Dashboard() {
 
       try {
         const [createdRes, joinedRes] = await Promise.all([
-          fetch('http://localhost:5000/api/events/me', {
+          fetch(`${API_BASE}/api/events/me`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
-          fetch('http://localhost:5000/api/events/joined', {
+          fetch(`${API_BASE}/api/events/joined`, {
             headers: { Authorization: `Bearer ${token}` },
           })
         ]);

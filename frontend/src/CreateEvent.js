@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { API_BASE } from './config';
 import './CreateEvent.css';
-
-const API_BASE = process.env.REACT_APP_API_BASE ?? "";
 
 function getStoredToken() {
   const t = localStorage.getItem("token");

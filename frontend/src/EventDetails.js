@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { API_BASE } from './config';
 import './EventDetails.css';
 
 function EventDetails() {
@@ -14,7 +15,7 @@ function EventDetails() {
   useEffect(() => {
     const fetchEvent = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/api/events/${id}`);
+        const res = await fetch(`${API_BASE}/api/events/${id}`);
         if (!res.ok) throw new Error('Failed to fetch event details');
         const data = await res.json();
         setEvent(data);
@@ -37,7 +38,7 @@ function EventDetails() {
 
     try {
       setJoinStatus('Joining...');
-      const res = await fetch(`http://localhost:5000/api/events/join/${id}`, {
+      const res = await fetch(`${API_BASE}/api/events/join/${id}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -52,7 +53,7 @@ function EventDetails() {
       setJoinStatus('Joined Successfully!');
       
       // Refresh event details to update participants list
-      const updatedRes = await fetch(`http://localhost:5000/api/events/${id}`);
+      const updatedRes = await fetch(`${API_BASE}/api/events/${id}`);
       if (updatedRes.ok) {
         setEvent(await updatedRes.json());
       }

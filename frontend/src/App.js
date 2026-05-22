@@ -9,6 +9,7 @@ import Groups from "./Groups";
 import Profile from "./Profile";
 import CreateEvent from "./CreateEvent";
 import { getErrorMessage } from "./apiErrors";
+import { API_BASE } from "./config";
 
 const PATH_TO_PAGE = {
   "/": "landing",
@@ -20,13 +21,6 @@ const PATH_TO_PAGE = {
   "/chatbox": "chatbox",
   "/profile": "profile",
 };
-
-/**
- * Dev: default "" → requests go to `/api/...` on the CRA dev server and proxy to port 5000 (package.json "proxy").
- * Set REACT_APP_API_BASE=http://localhost:5000 only if you are not using the CRA dev server proxy.
- * Production build: set REACT_APP_API_BASE to your deployed API URL.
- */
-const API_BASE = process.env.REACT_APP_API_BASE ?? "";
 
 function toDateInputValue(val) {
   if (!val) return "";

@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { API_BASE } from './config';
 import './EventList.css';
 
 function EventList() {
@@ -15,7 +16,7 @@ function EventList() {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const res = await fetch('http://localhost:5000/api/events');
+        const res = await fetch(`${API_BASE}/api/events`);
         if (!res.ok) throw new Error('Failed to fetch events');
         const data = await res.json();
         setEvents(data);
@@ -53,7 +54,7 @@ function EventList() {
     }
 
     try {
-      const res = await fetch(`http://localhost:5000/api/events/join/${eventId}`, {
+      const res = await fetch(`${API_BASE}/api/events/join/${eventId}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
